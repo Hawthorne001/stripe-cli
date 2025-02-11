@@ -67,6 +67,16 @@ type StripeOperation struct {
 	Path       string   `json:"path"`
 }
 
+// StripeEvent is a struct containing information about a Stripe event.
+type StripeEvent struct {
+	EventType string `json:"type"`
+}
+
+type StripeError struct {
+	Code           string `json:"code"`
+	HttpStatusCode int    `json:"httpStatusCode"`
+}
+
 // This is a list of fields that either we handle properly or we're confident
 // it's safe to ignore. If a field not in this list appears in the OpenAPI spec,
 // then we'll get an error so we remember to update stripe-mock to support it.
@@ -74,6 +84,7 @@ var supportedSchemaFields = []string{
 	"$ref",
 	"additionalProperties",
 	"anyOf",
+	"oneOf",
 	"description",
 	"enum",
 	"format",
@@ -89,12 +100,16 @@ var supportedSchemaFields = []string{
 	"x-expansionResources",
 	"x-resourceId",
 	"x-stripeOperations",
+	"x-stripeMostCommon",
+	"x-stripeEvent",
+	"x-stripeNotPublic",
+	"x-stripeError",
 
 	// This is currently being used to store additional metadata for our SDKs. It's
 	// passed through our Spec and should be ignored
 	"x-stripeParam",
 	"x-stripeResource",
-	"x-stripeEvent",
+	"deprecated",
 
 	// This is currently a hint for the server-side so I haven't included it in
 	// Schema yet. If we do start validating responses that come out of
@@ -113,6 +128,7 @@ type Schema struct {
 	AdditionalProperties interface{} `json:"additionalProperties,omitempty"`
 
 	AnyOf      []*Schema          `json:"anyOf,omitempty"`
+	OneOf      []*Schema          `json:"oneOf,omitempty"`
 	Enum       []interface{}      `json:"enum,omitempty"`
 	Format     string             `json:"format,omitempty"`
 	Items      *Schema            `json:"items,omitempty"`
@@ -131,6 +147,10 @@ type Schema struct {
 	XExpansionResources *ExpansionResources `json:"x-expansionResources,omitempty"`
 	XResourceID         string              `json:"x-resourceId,omitempty"`
 	XStripeOperations   *[]StripeOperation  `json:"x-stripeOperations,omitempty"`
+	XStripeMostCommon   []string            `json:"x-stripeMostCommon,omitempty"`
+	XStripeEvent        *StripeEvent        `json:"x-stripeEvent,omitempty"`
+	XStripeNotPublic    bool                `json:"x-stripeNotPublic,omitempty"`
+	XStripeError        *StripeError        `json:"x-stripeError"`
 }
 
 func (s *Schema) String() string {
